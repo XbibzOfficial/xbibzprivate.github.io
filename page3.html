@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Downloader - Xbibz Official</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* General Styles */
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        header {
+            text-align: center;
+            padding: 50px 20px;
+            background: rgba(0, 0, 0, 0.5);
+            margin-bottom: 20px;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin: 0;
+        }
+
+        header p {
+            font-size: 1.2rem;
+            margin: 10px 0 0;
+        }
+
+        .downloader-section {
+            padding: 20px;
+            text-align: center;
+        }
+
+        .downloader-section h2 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+        }
+
+        .downloader-options {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .downloader-option {
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            text-align: center;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            margin: 10px;
+            width: 200px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .downloader-option:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .downloader-option img {
+            width: 100px;
+            height: 100px;
+            margin-bottom: 10px;
+        }
+
+        .downloader-option h3 {
+            font-size: 1.2rem;
+            margin: 10px 0;
+        }
+
+        .downloader-option p {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .url-input {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .url-input input, .url-input select, .url-input button {
+            margin: 5px;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 1rem;
+        }
+
+        .url-input button {
+            background-color: #3498db;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .url-input button:hover {
+            background-color: #2980b9;
+        }
+
+        .loader {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #3498db;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 2s linear infinite;
+            display: none;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .back-button {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .back-button:hover {
+            background-color: #2980b9;
+        }
+
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 2s infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Additional Aesthetic Styles */
+        .downloader-section {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            padding: 30px;
+            margin: 20px auto;
+            max-width: 800px;
+        }
+
+        .url-input input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .url-input select {
+            appearance: none;
+            background: rgba(255, 255, 255, 0.1);
+            padding-right: 30px;
+            background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23FFFFFF%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 12px;
+        }
+
+        .url-input select:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+
+        .url-input button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        .url-input button:focus {
+            outline: none;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.5);
+            margin-top: 20px;
+        }
+
+        footer p {
+            margin: 0;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+    </style>
+</head>
+<body>
+    <!-- Animasi Bintang -->
+    <div class="stars">
+        <!-- Bintang-bintang akan di-generate oleh JavaScript -->
+    </div>
+
+    <header>
+        <h1>Sosmed Downloader (Beta)</h1>
+        <p>Download video dan Audio</p>
+    </header>
+
+    <section class="downloader-section">
+        <h2>Pilih Opsi Download</h2>
+        <p>Select a platform to download content:</p>
+        <div class="downloader-options">
+            <!-- TikTok Downloader -->
+            <div class="downloader-option" onclick="openDownloader('TikTok')">
+                <img src="https://files.catbox.moe/qd92wn.png" alt="TikTok Logo">
+                <h3>TikTok Downloader</h3>
+                <p>Download TikTok videos in MP3 or MP4 format.</p>
+            </div>
+
+            <!-- YouTube Downloader -->
+            <div class="downloader-option" onclick="openDownloader('YouTube')">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/0/09/YouTube_full-color_icon_(2017).svg" alt="YouTube Logo">
+                <h3>YouTube Downloader</h3>
+                <p>Download YouTube videos in MP3 or MP4 format.</p>
+            </div>
+
+            <!-- Instagram Downloader -->
+            <div class="downloader-option" onclick="openDownloader('Instagram')">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/e/e7/Instagram_logo_2016.svg" alt="Instagram Logo">
+                <h3>Instagram Downloader</h3>
+                <p>Download Instagram videos in MP3 or MP4 format.</p>
+            </div>
+
+            <!-- Facebook Downloader -->
+            <div class="downloader-option" onclick="openDownloader('Facebook')">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/5/51/Facebook_f_logo_(2019).svg" alt="Facebook Logo">
+                <h3>Facebook Downloader</h3>
+                <p>Download Facebook videos in MP3 or MP4 format.</p>
+            </div>
+        </div>
+
+        <!-- Form untuk input URL -->
+        <div class="url-input">
+            <h3>Enter Video URL:</h3>
+            <input type="text" id="videoUrl" placeholder="Paste video URL here...">
+            <select id="format">
+                <option value="mp3">MP3</option>
+                <option value="mp4">MP4</option>
+            </select>
+            <button onclick="startDownload()">Download</button>
+        </div>
+
+        <!-- Animasi Loading -->
+        <div class="loader" id="loader"></div>
+
+        <a href="index.html" class="back-button">Kembali</a>
+    </section>
+
+    <footer>
+        <p>&copy; 2024 Xbibz Official. All rights reserved.</p>
+    </footer>
+
+    <script>
+        // Script untuk membuat bintang
+        const starsContainer = document.querySelector('.stars');
+        const starCount = 200; // Jumlah bintang
+
+        for (let i = 0; i < starCount; i++) {
+            const star = document.createElement('div');
+            star.classList.add('star');
+            star.style.top = `${Math.random() * 100}%`;
+            star.style.left = `${Math.random() * 100}%`;
+            star.style.animationDuration = `${Math.random() * 2 + 1}s`; // Durasi animasi acak
+            starsContainer.appendChild(star);
+        }
+
+        // Script untuk membuka downloader
+        function openDownloader(platform) {
+            alert(`Redirecting to ${platform} Downloader...`);
+            // Anda dapat menambahkan logika untuk mengarahkan ke halaman downloader yang sesuai
+        }
+
+        // Script untuk memulai download
+        function startDownload() {
+            const videoUrl = document.getElementById('videoUrl').value;
+            const format = document.getElementById('format').value;
+            const loader = document.getElementById('loader');
+
+            if (!videoUrl) {
+                alert('Please enter a valid URL.');
+                return;
+            }
+
+            // Tampilkan animasi loading
+            loader.style.display = 'block';
+
+            // Simulasi proses download
+            setTimeout(() => {
+                loader.style.display = 'none';
+                alert(`Downloading ${format.toUpperCase()} from ${videoUrl}...`);
+                // Anda dapat menambahkan logika untuk mengunduh file di sini
+            }, 2000);
+        }
+
+        // Fungsi untuk mengunduh video dari TikTok
+        function downloadTikTok(url, format) {
+            // Logika untuk mengunduh video TikTok
+            console.log(`Downloading TikTok video from ${url} in ${format} format...`);
+            // Implementasi nyata memerlukan API pihak ketiga
+        }
+
+        // Fungsi untuk mengunduh video dari YouTube
+        function downloadYouTube(url, format) {
+            // Logika untuk mengunduh video YouTube
+            console.log(`Downloading YouTube video from ${url} in ${format} format...`);
+            // Implementasi nyata memerlukan API pihak ketiga
+        }
+
+        // Fungsi untuk mengunduh video dari Instagram
+        function downloadInstagram(url, format) {
+            // Logika untuk mengunduh video Instagram
+            console.log(`Downloading Instagram video from ${url} in ${format} format...`);
+            // Implementasi nyata memerlukan API pihak ketiga
+        }
+
+        // Fungsi untuk mengunduh video dari Facebook
+        function downloadFacebook(url, format) {
+            // Logika untuk mengunduh video Facebook
+            console.log(`Downloading Facebook video from ${url} in ${format} format...`);
+            // Implementasi nyata memerlukan API pihak ketiga
+        }
+    </script>
+</body>
+</html>

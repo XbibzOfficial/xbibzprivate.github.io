@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Xbibz AI (Beta)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+        
+        body {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            background-color: #f9f9f9;
+        }
+        
+        .header {
+            background-color: #7F39FB;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .header h1 {
+            font-size: 1.5rem;
+            margin-left: 10px;
+        }
+        
+        .logo {
+            width: 30px;
+            height: 30px;
+            background-color: white;
+            border-radius: 50%;
+        }
+        
+        .chat-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+        
+        .chat-message {
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .message-header {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .user-message .message-header {
+            color: #333;
+        }
+        
+        .ai-message .message-header {
+            color: #7F39FB;
+        }
+        
+        .message-content {
+            padding: 12px 16px;
+            border-radius: 12px;
+            max-width: 80%;
+            line-height: 1.5;
+        }
+        
+        .user-message .message-content {
+            background-color: #e6e6e6;
+            align-self: flex-end;
+            margin-left: auto;
+        }
+        
+        .ai-message .message-content {
+            background-color: #f0e6ff;
+            align-self: flex-start;
+        }
+        
+        .input-container {
+            display: flex;
+            padding: 15px;
+            background-color: white;
+            border-top: 1px solid #ddd;
+        }
+        
+        #message-input {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 24px;
+            outline: none;
+            resize: none;
+            height: 50px;
+            font-size: 1rem;
+        }
+        
+        #send-button {
+            background-color: #7F39FB;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            margin-left: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        #send-button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        
+        .typing-indicator {
+            display: none;
+            margin-bottom: 20px;
+        }
+        
+        .typing-indicator .message-content {
+            background-color: #f0e6ff;
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            border-radius: 12px;
+            max-width: 80px;
+        }
+        
+        .dot {
+            height: 8px;
+            width: 8px;
+            background-color: #7F39FB;
+            border-radius: 50%;
+            margin: 0 3px;
+            animation: bounce 1.5s infinite;
+            opacity: 0.7;
+        }
+        
+        .dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        
+        .dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+        
+        @keyframes bounce {
+            0%, 60%, 100% {
+                transform: translateY(0);
+            }
+            30% {
+                transform: translateY(-5px);
+            }
+        }
+        
+        code {
+            display: block;
+            background-color: #282c34;
+            color: #abb2bf;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+            white-space: pre;
+            margin: 10px 0;
+            font-family: "Consolas", monospace;
+        }
+        
+        .message-content p {
+            margin-bottom: 10px;
+        }
+        
+        .message-content ul, .message-content ol {
+            margin-left: 20px;
+            margin-bottom: 10px;
+        }
+
+        /* Styling untuk API key input */
+        .api-key-container {
+            padding: 10px;
+            background-color: #f0f0f0;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .api-key-container input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Input untuk API Key -->
+    <div class="api-key-container">
+        <input type="text" id="api-key-input" placeholder="Masukkan API Key Anda di sini (opsional)">
+    </div>
+
+    <div class="header">
+        <div class="logo"></div>
+        <h1>Chat Xbibz AI (Beta)</h1>
+    </div>
+    
+    <div class="chat-container" id="chat-container">
+        <div class="chat-message ai-message">
+            <div class="message-header">Xbibz AI (Beta)</div>
+            <div class="message-content">
+                Halo! Saya adalah asisten AI. Apa yang bisa saya bantu hari ini? Anda bisa bertanya tentang apa saja, termasuk pertanyaan umum, pemrograman, atau topik lainnya.
+            </div>
+        </div>
+        
+        <div class="typing-indicator ai-message" id="typing-indicator">
+            <div class="message-header">Xbibz AI (Beta)</div>
+            <div class="message-content">
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="input-container">
+        <textarea id="message-input" placeholder="Ketik pesan Anda di sini..." rows="1"></textarea>
+        <button id="send-button" disabled>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M22 2L11 13" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </button>
+    </div>
+
+    <script>
+        const messageInput = document.getElementById('message-input');
+        const sendButton = document.getElementById('send-button');
+        const chatContainer = document.getElementById('chat-container');
+        const typingIndicator = document.getElementById('typing-indicator');
+        const apiKeyInput = document.getElementById('api-key-input');
+
+        // Daftar respons yang telah disiapkan
+        const preparedResponses = {
+            "halo": "Halo! Apa kabar? Ada yang bisa saya bantu hari ini?",
+            "siapa kamu": "Saya adalah asisten AI yang dirancang untuk membantu Anda dengan berbagai pertanyaan dan tugas. Saya bisa menjawab pertanyaan umum, membantu dengan pemrograman, atau berdiskusi tentang berbagai topik.",
+            "terima kasih": "Sama-sama! Senang bisa membantu. Jika ada pertanyaan lain, jangan ragu untuk bertanya.",
+            "apa kabar": "Saya baik-baik saja, terima kasih telah bertanya! Bagaimana dengan Anda?",
+            "coding": "Saya bisa membantu Anda dengan coding. Bahasa pemrograman apa yang ingin Anda diskusikan? Saya familiar dengan JavaScript, Python, HTML, CSS, dan banyak lagi.",
+            "apa itu ai": "AI (Artificial Intelligence) atau Kecerdasan Buatan adalah cabang ilmu komputer yang berfokus pada pembuatan sistem yang dapat melakukan tugas-tugas yang biasanya memerlukan kecerdasan manusia. Ini mencakup pembelajaran mesin, pemrosesan bahasa alami, visi komputer, dan banyak bidang lainnya.",
+            "apa itu machine learning": "Machine Learning adalah subset dari AI yang berfokus pada sistem yang dapat belajar dari dan membuat prediksi berdasarkan data. Sistem machine learning meningkatkan kinerjanya seiring waktu saat diberi lebih banyak data.",
+            "apa itu html": "HTML (HyperText Markup Language) adalah bahasa markup standar untuk dokumen yang dirancang untuk ditampilkan di browser web. Ini adalah blok bangunan dasar dari halaman Web dan digunakan untuk mendefinisikan struktur konten.",
+            "apa itu css": "CSS (Cascading Style Sheets) adalah bahasa yang digunakan untuk mendeskripsikan tampilan dokumen yang ditulis dalam HTML. CSS menangani aspek presentasi, termasuk layout, warna, dan font.",
+            "apa itu javascript": "JavaScript adalah bahasa pemrograman tingkat tinggi yang digunakan untuk membuat halaman web interaktif. Ini adalah bahasa pemrograman inti dari World Wide Web, bersama HTML dan CSS.",
+            "apa itu python": "Python adalah bahasa pemrograman tingkat tinggi, ditafsirkan, umum yang terkenal dengan kesederhanaan sintaksnya dan keterbacaannya. Python sering digunakan untuk pengembangan web, ilmu data, AI, machine learning, dan automasi.",
+            "bagaimana cara membuat website": "Untuk membuat website, Anda perlu mempelajari HTML, CSS, dan JavaScript sebagai dasar. Anda dapat memulai dengan membuat halaman HTML sederhana, lalu menambahkan styling dengan CSS, dan interaktivitas dengan JavaScript. Ada banyak tutorial online gratis yang bisa membantu Anda memulai.",
+            "bagaimana cara memulai programming": "Untuk memulai programming, pilih bahasa yang ingin Anda pelajari terlebih dahulu (Python adalah pilihan bagus untuk pemula). Kemudian, cari sumber belajar seperti tutorial online, dokumentasi resmi, atau kursus. Penting untuk banyak berlatih dan membangun proyek kecil untuk memperkuat pemahaman Anda.",
+            "apa itu database": "Database adalah kumpulan data yang terorganisir, yang memungkinkan penyimpanan, pengambilan, dan manipulasi data secara efisien. Database digunakan dalam berbagai aplikasi, dari situs web hingga sistem perusahaan.",
+            "apa itu sql": "SQL (Structured Query Language) adalah bahasa pemrograman yang digunakan untuk mengelola dan memanipulasi database. SQL memungkinkan Anda untuk membuat, membaca, memperbarui, dan menghapus data dalam database.",
+            "apa itu api": "API (Application Programming Interface) adalah antarmuka yang memungkinkan aplikasi untuk berkomunikasi satu sama lain. API mendefinisikan cara pengembang dapat menggunakan layanan tertentu tanpa perlu mengetahui detail implementasinya.",
+            "siapa presiden indonesia": "Presiden Indonesia saat ini adalah Joko Widodo, yang menjabat sejak 20 Oktober 2014.",
+            "apa ibu kota indonesia": "Ibu kota Indonesia adalah Jakarta.",
+            "apa itu global warming": "Global warming atau pemanasan global adalah peningkatan suhu rata-rata atmosfer bumi dan lautan secara bertahap, yang terutama disebabkan oleh aktivitas manusia seperti pembakaran bahan bakar fosil dan deforestasi.",
+            "apa itu blockchain": "Blockchain adalah teknologi penyimpanan data terdistribusi yang digunakan untuk mencatat transaksi secara aman dan transparan. Teknologi ini menjadi dasar dari cryptocurrency seperti Bitcoin."
+        };
+        
+        // Respons untuk pertanyaan coding
+        const codingResponses = {
+            "html": `Tentu, berikut adalah contoh struktur dasar HTML:
+
+<code>&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+    &lt;title&gt;Judul Website&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;h1&gt;Halo Dunia!&lt;/h1&gt;
+    &lt;p&gt;Ini adalah paragraf pertama saya.&lt;/p&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code>
+
+Ini adalah struktur dasar yang dibutuhkan untuk setiap halaman HTML.`,
+
+            "python": `Berikut adalah contoh program Python sederhana:
+
+<code># Program untuk memeriksa bilangan prima
+def is_prime(num):
+    if num <= 1:
+        return False
+    if num <= 3:
+        return True
+    if num % 2 == 0 or num % 3 == 0:
+        return False
+    i = 5
+    while i * i <= num:
+        if num % i == 0 or num % (i + 2) == 0:
+            return False
+        i += 6
+    return True
+
+# Penggunaan fungsi
+number = 17
+if is_prime(number):
+    print(f"{number} adalah bilangan prima")
+else:
+    print(f"{number} bukan bilangan prima")</code>
+
+Program ini memeriksa apakah sebuah angka adalah bilangan prima atau bukan.`,
+
+            "javascript": `Berikut adalah contoh kode JavaScript untuk membuat counter sederhana:
+
+<code>// Counter sederhana dengan JavaScript
+let count = 0;
+
+// Fungsi untuk menambah counter
+function increment() {
+    count++;
+    console.log("Counter saat ini:", count);
+    return count;
+}
+
+// Fungsi untuk mengurangi counter
+function decrement() {
+    count--;
+    console.log("Counter saat ini:", count);
+    return count;
+}
+
+// Fungsi untuk reset counter
+function reset() {
+    count = 0;
+    console.log("Counter telah direset ke:", count);
+    return count;
+}
+
+// Contoh penggunaan
+increment(); // 1
+increment(); // 2
+decrement(); // 1
+reset();     // 0</code>
+
+Kode ini membuat fungsi-fungsi dasar untuk manajemen counter.`,
+
+            "css": `Berikut adalah contoh CSS untuk membuat tata letak responsif:
+
+<code>/* CSS untuk tata letak responsif */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 15px;
+}
+
+.row {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0 -15px;
+}
+
+.column {
+    padding: 0 15px;
+    flex: 1;
+}
+
+/* Media query untuk tablet */
+@media (max-width: 768px) {
+    .column {
+        flex: 0 0 50%;
+        max-width: 50%;
+    }
+}
+
+/* Media query untuk mobile */
+@media (max-width: 576px) {
+    .column {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+}</code>
+
+CSS ini membuat tata letak kolom yang akan menyesuaikan dengan ukuran layar perangkat.`
+        };
+        
+        // Aktifkan/nonaktifkan tombol kirim berdasarkan input
+        messageInput.addEventListener('input', () => {
+            sendButton.disabled = messageInput.value.trim() === '';
+            
+            // Auto-resize textarea
+            messageInput.style.height = 'auto';
+            messageInput.style.height = (messageInput.scrollHeight > 50) ? 
+                Math.min(messageInput.scrollHeight, 150) + 'px' : '50px';
+        });
+        
+        // Event listener untuk tombol enter
+        messageInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                if (!sendButton.disabled) {
+                    sendMessage();
+                }
+            }
+        });
+        
+        // Event listener untuk tombol kirim
+        sendButton.addEventListener('click', sendMessage);
+        
+        async function sendMessage() {
+            const messageText = messageInput.value.trim();
+            if (messageText === '') return;
+            
+            // Tambahkan pesan pengguna ke chat
+            addMessage('Anda', messageText, 'user-message');
+            
+            // Reset input
+            messageInput.value = '';
+            messageInput.style.height = '50px';
+            sendButton.disabled = true;
+            
+            // Tampilkan indikator mengetik
+            typingIndicator.style.display = 'flex';
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+            
+            // Simulasi pemrosesan AI (penundaan acak)
+            setTimeout(async () => {
+                // Sembunyikan indikator mengetik
+                typingIndicator.style.display = 'none';
+                
+                // Tentukan respons
+                let response = await getResponse(messageText.toLowerCase());
+                
+                // Jika AI tidak tahu jawabannya, arahkan ke pencarian Google
+                if (response === "Maaf, saya tidak tahu jawabannya. Coba cari di Google.") {
+                    const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(messageText)}`;
+                    response = `Maaf, saya tidak tahu jawabannya. Anda bisa mencari di <a href="${searchUrl}" target="_blank">Google</a>.`;
+                }
+                
+                // Tambahkan respons AI ke chat
+                addMessage('Xbibz AI (Beta)', response, 'ai-message');
+            }, Math.random() * 1000 + 1000); // Penundaan 1-2 detik
+        }
+        
+        async function getResponse(text) {
+            const apiKey = "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"; // API key disisipkan langsung
+            
+            // Jika API key dimasukkan, coba gunakan API AI
+            if (apiKey) {
+                try {
+                    const response = await fetch('https://api.openai.com/v1/completions', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${apiKey}`
+                        },
+                        body: JSON.stringify({
+                            model: "gpt-4o-mini", // Model yang digunakan
+                            prompt: text,
+                            max_tokens: 150
+                        })
+                    });
+
+                    const data = await response.json();
+                    if (data.choices && data.choices.length > 0) {
+                        return data.choices[0].text.trim();
+                    }
+                } catch (error) {
+                    console.error("Error fetching AI response:", error);
+                }
+            }
+            
+            // Jika tidak ada API key atau API gagal, gunakan respons lokal
+            for (const key in preparedResponses) {
+                if (text.includes(key)) {
+                    return preparedResponses[key];
+                }
+            }
+            
+            // Periksa apakah pertanyaan tentang coding
+            if (text.includes('javascript') || text.includes('js')) {
+                return codingResponses.javascript;
+            } else if (text.includes('python')) {
+                return codingResponses.python;
+            } else if (text.includes('html')) {
+                return codingResponses.html;
+            } else if (text.includes('css')) {
+                return codingResponses.css;
+            } else if (text.includes('code') || text.includes('coding') || text.includes('program')) {
+                return "Saya bisa membantu dengan coding. Bahasa pemrograman apa yang Anda ingin ketahui? Saya bisa memberikan contoh untuk JavaScript, Python, HTML, atau CSS.";
+            }
+            
+            // Generasi respons berdasarkan pola umum
+            if (text.includes('apa') && (text.includes('itu') || text.includes('adalah'))) {
+                const topic = text.replace(/apa itu |apakah |adalah /g, '').trim();
+                return generateDefinition(topic);
+            }
+            
+            if (text.includes('bagaimana') || text.includes('cara')) {
+                return generateHowTo(text);
+            }
+            
+            if (text.includes('?')) {
+                return generateGenericAnswer(text);
+            }
+            
+            // Jika tidak ada jawaban yang cocok, arahkan ke pencarian Google
+            return "Maaf, saya tidak tahu jawabannya. Coba cari di Google.";
+        }
+        
+        function generateDefinition(topic) {
+            const definitions = {
+                "ai": "AI (Artificial Intelligence) atau Kecerdasan Buatan adalah cabang ilmu komputer yang berfokus pada pembuatan sistem yang dapat melakukan tugas-tugas yang biasanya memerlukan kecerdasan manusia. Ini mencakup pembelajaran mesin, pemrosesan bahasa alami, visi komputer, dan banyak bidang lainnya.",
+                "machine learning": "Machine Learning adalah subset dari AI yang berfokus pada sistem yang dapat belajar dari dan membuat prediksi berdasarkan data. Sistem machine learning meningkatkan kinerjanya seiring waktu saat diberi lebih banyak data.",
+                "html": "HTML (HyperText Markup Language) adalah bahasa markup standar untuk dokumen yang dirancang untuk ditampilkan di browser web. Ini adalah blok bangunan dasar dari halaman Web dan digunakan untuk mendefinisikan struktur konten.",
+                "css": "CSS (Cascading Style Sheets) adalah bahasa yang digunakan untuk mendeskripsikan tampilan dokumen yang ditulis dalam HTML. CSS menangani aspek presentasi, termasuk layout, warna, dan font.",
+                "javascript": "JavaScript adalah bahasa pemrograman tingkat tinggi yang digunakan untuk membuat halaman web interaktif. Ini adalah bahasa pemrograman inti dari World Wide Web, bersama HTML dan CSS.",
+                "python": "Python adalah bahasa pemrograman tingkat tinggi, ditafsirkan, umum yang terkenal dengan kesederhanaan sintaksnya dan keterbacaannya. Python sering digunakan untuk pengembangan web, ilmu data, AI, machine learning, dan automasi.",
+                "database": "Database adalah kumpulan data yang terorganisir, yang memungkinkan penyimpanan, pengambilan, dan manipulasi data secara efisien. Database digunakan dalam berbagai aplikasi, dari situs web hingga sistem perusahaan.",
+                "sql": "SQL (Structured Query Language) adalah bahasa pemrograman yang digunakan untuk mengelola dan memanipulasi database. SQL memungkinkan Anda untuk membuat, membaca, memperbarui, dan menghapus data dalam database.",
+                "api": "API (Application Programming Interface) adalah antarmuka yang memungkinkan aplikasi untuk berkomunikasi satu sama lain. API mendefinisikan cara pengembang dapat menggunakan layanan tertentu tanpa perlu mengetahui detail implementasinya."
+            };
+            
+            for (const key in definitions) {
+                if (topic.includes(key)) {
+                    return definitions[key];
+                }
+            }
+            
+            return `Berdasarkan pertanyaan Anda tentang "${topic}", ini adalah konsep yang luas dan dapat merujuk ke berbagai hal tergantung konteksnya. Bisa Anda jelaskan lebih spesifik apa yang ingin Anda ketahui?`;
+        }
+        
+        function generateHowTo(text) {
+            if (text.includes('website')) {
+                return "Untuk membuat website, Anda perlu mempelajari HTML, CSS, dan JavaScript sebagai dasar. Anda dapat memulai dengan membuat halaman HTML sederhana, lalu menambahkan styling dengan CSS, dan interaktivitas dengan JavaScript. Ada banyak tutorial online gratis yang bisa membantu Anda memulai.";
+            }
+            
+            if (text.includes('program') || text.includes('coding')) {
+                return "Untuk memulai programming, pilih bahasa yang ingin Anda pelajari terlebih dahulu (Python adalah pilihan bagus untuk pemula). Kemudian, cari sumber belajar seperti tutorial online, dokumentasi resmi, atau kursus. Penting untuk banyak berlatih dan membangun proyek kecil untuk memperkuat pemahaman Anda.";
+            }
+            
+            return "Untuk membantu Anda dengan pertanyaan 'bagaimana cara' ini, saya memerlukan informasi lebih detail tentang apa yang ingin Anda capai. Bisa Anda jelaskan lebih spesifik?";
+        }
+        
+        function generateGenericAnswer(text) {
+            const answers = [
+                "Berdasarkan informasi yang tersedia, jawaban untuk pertanyaan Anda memerlukan konteks lebih spesifik. Bisa Anda berikan detail tambahan?",
+                "Pertanyaan yang menarik! Ada beberapa cara untuk memandang ini tergantung konteksnya. Aspek apa yang paling Anda minati?",
+                "Itu pertanyaan yang bagus. Jawabannya bisa bervariasi tergantung pada konteks spesifik yang Anda maksud. Bisa Anda elaborasi lebih lanjut?",
+                "Untuk menjawab pertanyaan ini dengan akurat, saya perlu informasi tambahan. Bisa Anda menjelaskan lebih detail apa yang Anda cari?"
+            ];
+            
+            return answers[Math.floor(Math.random() * answers.length)];
+        }
+        
+        function addMessage(sender, text, messageClass) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `chat-message ${messageClass}`;
+            
+            const headerDiv = document.createElement('div');
+            headerDiv.className = 'message-header';
+            headerDiv.textContent = sender;
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            contentDiv.innerHTML = formatMessage(text);
+            
+            messageDiv.appendChild(headerDiv);
+            messageDiv.appendChild(contentDiv);
+            
+            chatContainer.insertBefore(messageDiv, typingIndicator);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+        
+        function formatMessage(text) {
+            // Deteksi dan format kode
+            text = text.replace(/```([\s\S]*?)```/g, '<code>$1</code>');
+            
+            // Format paragraf
+            const paragraphs = text.split('\n\n');
+            if (paragraphs.length > 1) {
+                return paragraphs.map(p => `<p>${p}</p>`).join('');
+            }
+            
+            return text;
+        }
+    </script>
+</body>
+</html>
